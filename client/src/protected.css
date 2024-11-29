@@ -1,0 +1,24 @@
+.main-user {
+    margin: 0;
+    background-color: rgb(230, 230, 230);
+}
+
+.nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: white;
+    font-weight: bold;
+}
+
+.nav-second p {
+    margin: 0;
+}
+
+.nav-second {
+    background-color: blue;
+    color: white;
+    font-weight: bold;
+    width: max-content;
+    height: 100vh;
+}
