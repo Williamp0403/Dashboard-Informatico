@@ -50,24 +50,34 @@
     margin: 0;
 }
 
-.modal {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    border: 0;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(5, 5, 5, 0.897);
+.modalContainer {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    background-color: rgba(0, 0, 0, 0.7); 
 } 
 
-.modal-container {
+.modalContent {
+    position: relative;
+    background-color: white;
+    color: rgba(107, 114, 128, 1);;
+    height: max-content;
+    width: 350px;
+    padding: 20px;
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    justify-content: center;
+    align-items: start;
     gap: 10px;
 }
 
 .modal-input {
-    width: 300px;
+    width: 90%;
     height: 20px;
     padding: 10px 15px;
     font-size: 15px;
@@ -88,9 +98,11 @@
     color: white;
     font-weight: bold;
     transition: .3s ease;
-    border: 0;
+    border: none;
     border-radius: 1000px;
     padding: 13px;
+    width: 100%;
+    align-self: center;
 }
 
 .modal-button:hover {
@@ -101,17 +113,19 @@
     background-color: rgb(190, 190, 190);
 }
 
-
 .mydict-label span:focus {
     outline: 0;
     border-color: #2260ff;
     box-shadow: 0 0 0 4px #b5c9fc;
   }
+
+  .mydict {
+    align-self: center;
+  }
   
   .mydict div {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
   }
   
   .mydict input[type="radio"] {
@@ -153,14 +167,18 @@
     border-radius: 0 .375em .375em 0;
   }
 
-.container-matters-label {
+.container-data {
+    align-self: center;
+}
+
+.container-data-label {
     text-align: center;
     display: block;
     font-weight: bold;
     font-size: 15px;
 }
 
-.container-matters-select {
+.container-data-select {
     padding: 5px;
     border: 2px solid #ccc;
     border-radius: 5px;
@@ -169,11 +187,11 @@
     transition: border-color 0.3s ease;
 }
 
-.container-matters-select:hover {
+.container-data-select:hover {
     border-color: #888;
 }
 
-.container-matters-select:focus {
+.container-data-select:focus {
     outline: none;
     border-color: #007BFF;
 }

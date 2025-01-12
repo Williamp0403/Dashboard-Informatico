@@ -1,0 +1,19 @@
+.activitie {
+    background-color: white;
+    width: 230px;
+    height: 250px;
+    border-radius: 10px;
+    font-weight: bold;
+    padding: 10px;
+    color: rgba(107, 114, 128, 1);
+    box-shadow: 15px 15px 30px #bebebe,
+    -15px -15px 30px #ffffff;
+    box-sizing: border-box;
+}
+
+.activitie-title {
+    text-align: center;
+    text-decoration: underline;
+}
+
+

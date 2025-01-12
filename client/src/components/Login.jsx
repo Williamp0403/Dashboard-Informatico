@@ -1,85 +1,48 @@
 import { useState } from "react"
 import { ButtonRadio } from "./ButtonRadio.jsx"
-import axios from 'axios'
-import Swal from 'sweetalert2'
+import { Options } from "./Options.jsx"
+import { login, register, getAllMatters, getSections} from '../logic/login.js'
 import '../App.css'
 
 export function Login ({user, setUser}) {
-
+    // Si hay usuario con sesion activa, retorna null, si no, sigue el codigo
     if (user != null) return null
 
+    // Constantes que guardan los valores al iniciar sesion
     const [identityCard, setIdentityCard] = useState(Number)
     const [password,setPassword] = useState('')
     const [charge, setCharge] = useState('')
 
+    // Constantes que guardan los valores al registrarse
     const [name,setName] = useState('')
     const [lastname,setLastname] = useState('')
     const [idCard,setIdCard] = useState(Number)
     const [newCharge,setNewCharge] = useState('')
-    const [matter,setMatter] = useState(Number)
+    const [section,setSection] = useState('')
+    const [idSection, setIdSection] = useState('')
+    const [idMatter, setIdMatter] = useState('')
+    const [matter,setMatter] = useState('')
     const [newPassword, setNewPassword] = useState('')
 
     const [listMatters, setListMatters] = useState([])
+    const [listSections, setListSections] = useState([]) 
 
-    const [modal,setModal] = useState(false)
-    const state = modal ? 'modal' : ''
+    const [modalIsOpen,setModalIsOpen] = useState(false)
     
-    const login = () => {
-        axios.post('http://localhost:3001/login', {
-            identityCard: parseInt(identityCard),
-            password: password,
-            charge: charge
-        }).then((res) => {
-            console.log('login: ', res)
-            Swal.fire({
-                html: "Bienvenido " + res.data.name,
-                icon: "success"
-            }).then(() => {
-                localStorage.setItem('access_token', JSON.stringify(res.data))
-                setUser(res.data)
-            })
-        }).catch((error) => {
-            Swal.fire({
-                icon: "error",
-                text: "Error!",
-                html: errors(error)
-            })
-        })
+    const buttonLogin = () => {
+        login({ identityCard, password, charge, setUser })
     }
 
-    const register = () => {
-        axios.post('http://localhost:3001/register', {
-            name: name,
-            lastname: lastname,
-            identityCard: parseInt(idCard),
-            charge: newCharge,
-            matter: matter,
-            password: newPassword
-        }).then((res) => {
-            console.log(res)
-            Swal.fire({
-                text: "Registrado correctamente",
-                html: "Bienvenido " + res.data.name,
-                icon: "success"
-            }).then(() => {
-                localStorage.setItem('access_token', JSON.stringify(res.data))
-                setUser(res.data)
-            })
-        }).catch((error) => {
-            Swal.fire({
-                icon: "error",
-                text: "Error!",
-                html: errors(error)
-            })
-        })
+    const buttonRegister = () => {
+        register({ name,lastname,idCard,newCharge,newPassword,section,idSection,matter,idMatter,setUser })
     }
 
-    const getMatters = () => {
-        axios.get('http://localhost:3001/matters').then((res) => {
-            setListMatters(res.data)
-        }).catch((error) => {
+    const buttonMatters = () => {
+        getAllMatters({ setListMatters })
+    }
 
-        })
+    const buttonSections = () => {
+        getSections({ setListSections })
     }
 
     const cleanInputs = () => {
@@ -88,15 +51,6 @@ export function Login ({user, setUser}) {
         setIdCard('')
         setCharge('')
         setNewPassword('')
-    }
-
-    const errors = (error) => {
-        const e = JSON.parse(JSON.stringify(error)).message
-        if(e == 'Request failed with status code 400') return error.response.data.map((data,key) => { return '<br>' + data.message } )       
-        if (e == 'Request failed with status code 401') return error.response.data
-        if( e == 'Request failed with status code 409') return error.response.data
-
-        return 'Error!! Intente mas tarde'
     }
 
     return (
@@ -113,50 +67,44 @@ export function Login ({user, setUser}) {
                 onChange={(event)=>setIdentityCard(event.target.value)}/>
             <input className="login-input" type="password" placeholder="Contraseña" 
                 onChange={(event)=>setPassword(event.target.value)}/>
-            <p className="register">No tienes cuenta? haz <a href='#' onClick={()=>{setModal(true)}}>Click aqui</a> para registrarte</p>
-            <dialog className={state}>
-                <button className="closeModal" 
-                    onClick={()=>{
-                            setModal(false)
-                            cleanInputs()
-                    }}>X
-                </button>
-                <div className="modal-container">
-                    <input className="modal-input" placeholder="Nombre" value={name} type="text" 
-                        onChange={(event)=>setName(event.target.value)}/>
-                    <input className="modal-input" placeholder="Apellido" value={lastname} type="text"
-                        onChange={(event)=>setLastname(event.target.value)}/>
-                    <input className="modal-input" placeholder="Cédula" value={idCard} type="number"
-                        onChange={(event)=>setIdCard(event.target.value)}/>
-                        <input className="modal-input" placeholder="Contraseña" value={newPassword}type="password"
-                    onChange={(event)=>setNewPassword(event.target.value)}/>
-                    {
-                        newCharge == "Teachers" ? 
-                        <div className="container-matters"> 
-                        <label className="container-matters-label" htmlFor="materia">Selecciona una materia:</label>
-                        <select onChange={(event) => {
-                            setMatter(event.target.selectedOptions[0].getAttribute("matter-id"))}
-                            } 
-                        className="container-matters-select" id="materia" name="materia"> 
+            <p className="register">No tienes cuenta? haz <a href='#' onClick={()=>{setModalIsOpen(true)}}>Click aqui</a> para registrarte</p>
+            {
+                modalIsOpen == false ? null
+                :
+                <section className="modalContainer">
+                    <div className="modalContent">
+                        <button className="closeModal" 
+                            onClick={()=>{
+                                    setModalIsOpen(false)
+                                    cleanInputs()
+                            }}>X
+                        </button>
+                            <input className="modal-input" placeholder="Nombre" value={name} type="text" 
+                            onChange={(event)=>setName(event.target.value)}/>
+                        <input className="modal-input" placeholder="Apellido" value={lastname} type="text"
+                            onChange={(event)=>setLastname(event.target.value)}/>
+                        <input className="modal-input" placeholder="Cédula" value={idCard} type="number"
+                            onChange={(event)=>setIdCard(event.target.value)}/>
+                            <input className="modal-input" placeholder="Contraseña" value={newPassword}type="password"
+                        onChange={(event)=>setNewPassword(event.target.value)}/>
                         {
-                            listMatters.map((data,key) => {
-                                return <option key={data.id_matter} matter-id={data.id_matter} value={data.matter_name}>{data.matter_name}</option>
-                            })
+                            newCharge == "Teachers" ? 
+                                <Options title="Selecciona una materia" getData={setMatter} getID={setIdMatter} showData={listMatters}></Options>
+                            : newCharge == "Students" ?  
+                                <Options title="Selecciona un semestre" getData={setSection} getID={setIdSection} showData={listSections}></Options>
+                            : null
                         }
-                        </select>
+                        <div className="mydict">
+                            <div>
+                                <ButtonRadio getData={buttonSections} setCharge={setNewCharge} value={"Students"} name={"Estudiante"} type="show-data"></ButtonRadio>
+                                <ButtonRadio getData={buttonMatters} setCharge={setNewCharge} value={"Teachers"} name={"Profesor"} type="show-data"></ButtonRadio>
+                            </div>
                         </div>
-                        : null
-                    }
-                    <div className="mydict">
-                        <div>
-                            <ButtonRadio setCharge={setNewCharge} value={"Students"} name={"Estudiante"}></ButtonRadio>
-                            <ButtonRadio getMatters={getMatters} setCharge={setNewCharge} value={"Teachers"} name={"Profesor"} id="register_teacher"></ButtonRadio>
-                        </div>
+                        <button className="modal-button" onClick={buttonRegister}>Enviar</button>
                     </div>
-                </div>
-                <button className="modal-button" onClick={register}>Enviar</button>
-            </dialog>
-            <button className="login-button" onClick={login}>Entrar</button>
+                </section>
+            }
+            <button className="login-button" onClick={buttonLogin}>Entrar</button>
         </article>
         </main>
     )
