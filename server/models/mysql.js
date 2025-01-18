@@ -1,6 +1,6 @@
 import mysql from 'mysql2/promise'
 import bcrypt from 'bcrypt'
-import { format } from 'date-fns'
+import { format, addDays } from 'date-fns'
 
 const config = {
     host: 'localhost',
@@ -72,7 +72,7 @@ export class userModel {
         }
     }
 
-    static async joinRooms ({ id_section,id_matter }) {
+    static async joinRooms ({ id_section, id_matter }) {
         try {
             if (id_section != 'undefined') {
                 const [matters] = await connection.query (
@@ -93,10 +93,43 @@ export class userModel {
         }
     }
 
+    static async getActivitieForActivities ({ id_section, id_matter }) {
+        try {
+            const date = new Date()
+            const currentDate = format(date, 'yyyy-MM-dd')
+            const endDate = format(addDays(date, 4), 'yyyy-MM-dd')
+
+            if (id_section != 'undefined') {
+                const [ activities ] = await connection.query (
+                    `SELECT a.id_matter, matter_name, title, description, court, DATE_FORMAT(date, '%Y-%m-%d') as date, value FROM Sections s JOIN Matters m 
+                    ON s.id_semester = m.id_semester JOIN Activities a ON m.id_matter = a.id_matter 
+                    WHERE s.id_section = ? AND date BETWEEN ? AND ?
+                    ORDER BY date`, [id_section, currentDate, endDate]
+                )  
+                if (activities.length == 0) return ( { message: 'No hay actividades cercanas'}) 
+                return activities   
+            }
+            console.log(id_matter)
+            if (id_matter != 'undefined') {
+                const [activities] = await connection.query (
+                    `SELECT a.id_matter, a.id_activitie , matter_name, title, description, court, DATE_FORMAT(date, '%Y-%m-%d') as date, value FROM Activities a JOIN Matters m 
+                    ON a.id_matter = m.id_matter WHERE m.id_matter = ? AND date BETWEEN ? AND ?
+                    ORDER BY date`, [id_matter, currentDate, endDate]
+                )
+                if (activities.length == 0) return ( { message: 'No hay actividades cercanas'}) 
+                return activities   
+            }
+
+   
+        } catch (e) {
+            console.log(e)
+            return
+        }
+    }
+
     static async getAllMatters () {
         try {   
             const [matters] = await connection.query(`SELECT id_matter id_data, matter_name data_name FROM Matters`)
-            console.log(matters)
             return matters
         } catch (e) {
             console.log(e)
@@ -132,7 +165,7 @@ export class userModel {
             if (id_matter != 'undefined') {
                 const [activities] = await connection.query (
                     `SELECT a.id_matter, a.id_activitie , matter_name, title, description, court, DATE_FORMAT(date, '%Y-%m-%d') as date, value FROM Activities a JOIN Matters m 
-                    ON a.id_matter = m.id_matter WHERE m.id_matter = ?`, [id_matter]
+                    ON a.id_matter = m.id_matter WHERE m.id_matter = ? ORDER BY date`, [id_matter]
                 )
                 if (activities.length == 0) return false
                 return activities
@@ -142,7 +175,7 @@ export class userModel {
                 const [activities] = await connection.query (
                     `SELECT a.id_matter, matter_name, title, description, court, DATE_FORMAT(date, '%Y-%m-%d') as date, value FROM Sections s JOIN Matters m 
                     ON s.id_semester = m.id_semester JOIN Activities a ON m.id_matter = a.id_matter
-                   WHERE s.id_section = ?`, [id_section]
+                   WHERE s.id_section = ? ORDER BY date`, [id_section]
                 )
                 if (activities.length == 0) return false             
                 return activities
@@ -197,7 +230,6 @@ export class userModel {
 
             for (const note of listNotes) {
                 const { id_note ,id_student, rating } = note
-                console.log( id_note ,id_student, rating)
                 await connection.query (
                     `UPDATE Notes SET rating = ?, date = ? WHERE id_note = ?`,
                     [rating, currentDate, id_note]

@@ -9,7 +9,8 @@
 .name-group {
     text-align: center;
     font-weight: bold;
-    background-color: #cccccc;
+    background-color: rgb(37 99 235);
+    color: white;
     margin: 0;
     padding: 20px;
 }
@@ -48,7 +49,8 @@
 
 .message-box {
     display: flex;
-    padding-top: 20px;
+    height: 48px;
+    padding: 4px;
 }
 
 .message-input {

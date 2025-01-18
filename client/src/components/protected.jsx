@@ -8,9 +8,8 @@ import { ContainerActivitie } from './ContainerActivitie.jsx'
 import { Chat } from './Chat.jsx'
 import { Modal } from './Modal.jsx'
 import { errors } from '../logic/login.js'
-import { getHours } from '../logic/protected.js'
+import { getHours, formatDate } from '../logic/protected.js'
 import axios from 'axios'
-
 
 export function Protected ({user, setUser}) {
 
@@ -21,13 +20,14 @@ export function Protected ({user, setUser}) {
     const socket = io('http://localhost:3001', {
         query: {
             id_section,
-            id_matter 
+            id_matter
         }
     })
 
     const [activateOption,setActivateOption] = useState(0)
     const [modalIsOpen,setModalIsOpen] = useState(false)
 
+    const [listActivitiesForDay, setlistActivitiesForDay] = useState({ activities: [], message: '' });
     const [listActivities, setListActivities] = useState([])
     const [listNotes, setListNotes] = useState([])
     const [listMatters, setListMatters] = useState([])
@@ -48,6 +48,7 @@ export function Protected ({user, setUser}) {
 
     const showInit = () => {
         console.log('inicio')
+        getActivitiesForDays()
     }
 
     const showActivities = () => {
@@ -55,10 +56,29 @@ export function Protected ({user, setUser}) {
         getActivities()
     }
 
+    const getActivitiesForDays = () => {
+        axios.get(`http://localhost:3001/activitie-day?id_section=${user.id_section}&id_matter=${user.id_matter}`).then((res) => {
+            if (res.data.message) { 
+                setlistActivitiesForDay({ activities: [], message: res.data.message })
+            } else { 
+                formatDate(res.data)
+                setlistActivitiesForDay({ activities: res.data, message: '' })
+            }
+        }).catch((error) => {
+            console.log(error)
+            setlistActivitiesForDay({ activities: [], message: 'Error al obtener las actividades' })
+        })
+    }
+
+    useEffect(() => { 
+        getActivitiesForDays()
+    }, [user.id_section]);
+
     const getRooms = () => {
         axios.get(`http://localhost:3001/rooms?id_matter=${user.id_matter}&id_section=${user.id_section}`).then((res) => {
             setListGroups(res.data)
-            console.log(res)
+        }).catch((error) => {
+            console.log(error)
         })
     }
 
@@ -166,9 +186,9 @@ export function Protected ({user, setUser}) {
     }
 
     const getMessages = () => {
-        console.log('messa')
         axios.get(`http://localhost:3001/messages?room=${group}`).then((res) => {
             setMessages(res.data)
+            setTimeout(() => scrollToBottom(), 100);
         }).catch((error) => {
 
         })
@@ -180,8 +200,6 @@ export function Protected ({user, setUser}) {
 
     const scrollToBottom = () => { 
         if (messageBoxRef.current) { 
-            console.log('scroll')
-            console.log(messageBoxRef.current)
             messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight
         }
     }
@@ -191,10 +209,9 @@ export function Protected ({user, setUser}) {
         socket.on('chat message', (msg) => {
             if(msg.group == group) {
                 setMessages((prevMessages) => [...prevMessages, { content: msg.content , hour: msg.hour, username: msg.username}])
-                scrollToBottom()
+                setTimeout(() => scrollToBottom(), 100);
             }
         })
-
         return() => {
             socket.off('chat message')
         }
@@ -205,7 +222,7 @@ export function Protected ({user, setUser}) {
         if (message.trim()) {
             const now = new Date(), hours = now.getHours(), minutes = now.getMinutes() 
             const ampm = hours >= 12 ? 'pm' : 'am'
-            const formattedHours = hours % 12 || 12 // Convierte 0 en 12 
+            const formattedHours = hours % 12 || 12 
             const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes
             const timeString = `${formattedHours}:${formattedMinutes} ${ampm}`
 
@@ -252,11 +269,6 @@ export function Protected ({user, setUser}) {
             title: 'Chat',
             d: 'M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z'
         },
-        {
-            click: closeSession,
-            title: 'Cerrar Sesión',
-            d: 'M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75'
-        }
     ]
 
     return (
@@ -286,14 +298,57 @@ export function Protected ({user, setUser}) {
                         )
                     })
                   }
-                </div> 
+                <div onClick={closeSession} className='option'>
+                    <svg fill="none" viewBox="0 0 24 24"  stroke="currentColor">
+                        <path strokeLinecap="round" strokeWidth="2" d='M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75'>
+                        </path>
+                    </svg>
+                    <p>Cerrar sesion</p>
+                </div>
+            </div> 
             <div className="content">               
                 {
                     activateOption == 0 ?
-                        <h1>Inicio</h1> 
+                        <section className='container-init'>
+                            <div className='container-news'>
+                                <h1>Noticias</h1>
+                            </div>
+                            <div className='container-reminder'>
+                                <div className='container-reminder-title'>
+                                    <h1>Recordatorio</h1>
+                                    <div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                                        </svg>
+                                        <span>{!listActivitiesForDay.activities.length ? '0' : listActivitiesForDay.activities.length}</span>
+                                    </div>
+                                </div>
+                                {   (listActivitiesForDay.message) ? (
+                                      <p className='box-activite-day'>{listActivitiesForDay.message}</p>
+                                    ): (
+                                        listActivitiesForDay.activities.map((activitie,key) => {  
+                                            return <div className='box-activite-day' key={key}>
+                                                        <div className='box-activite-day-info'>
+                                                            <div></div>
+                                                            <p>{activitie.title + " - " + activitie.matter_name}</p>
+                                                            <span></span> 
+                                                        </div>
+                                                        <div className='box-activite-day-date'>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                                                            </svg>
+                                                            <span>{activitie.date}</span>
+                                                        </div>
+                                                    </div>
+                                        })
+                                    )
+                                }
+                            </div>
+                        </section>
 
                     : activateOption == 1 ?
-                    <>  
+                    <section className='container-activities'>
+                        <h1>Actividades</h1>
                     {
                         user.charge == "Teachers" ? 
                         <AddActivity setModalIsOpen={setModalIsOpen}></AddActivity>
@@ -306,25 +361,20 @@ export function Protected ({user, setUser}) {
                             getActivities={getActivities}
                         >
                         </Modal>
-                        <section className='container-activities'>
+                        <section className='box-activities'>
                         {
                             (typeof listActivities != "string") ? 
                                 listActivities.map((activitie,key) => {
-                                const { title, description, court, date, value } = activitie
                                 return <ContainerActivitie 
                                         key={key}
-                                        title={activitie.title}
-                                        description={activitie.description}
-                                        court={activitie.court}
-                                        date={activitie.date}
-                                        value={activitie.value}
+                                        activitie={activitie}
                                     >
                                     </ContainerActivitie>
                                 })
                                 : <h1>{listActivities}</h1>
                         }
                         </section>
-                    </>
+                    </section>
                     : activateOption == 2 ?
                     <section className='container-notes'>
                     {

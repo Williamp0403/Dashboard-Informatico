@@ -67,7 +67,7 @@ export function Login ({user, setUser}) {
                 onChange={(event)=>setIdentityCard(event.target.value)}/>
             <input className="login-input" type="password" placeholder="Contraseña" 
                 onChange={(event)=>setPassword(event.target.value)}/>
-            <p className="register">No tienes cuenta? haz <a href='#' onClick={()=>{setModalIsOpen(true)}}>Click aqui</a> para registrarte</p>
+            <p className="register">No tienes cuenta? haz <a href='#' onClick={()=>{setModalIsOpen(true)}}>click aqui</a> para registrarte</p>
             {
                 modalIsOpen == false ? null
                 :

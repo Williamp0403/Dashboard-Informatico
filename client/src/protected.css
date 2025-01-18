@@ -16,25 +16,24 @@
     display: flex;
     justify-content: space-around;
     text-align: center;
-	background-color: rgb(156 163 175);
+    background-color: rgb(96 165 250 / var(--tw-bg-opacity, 1));
     color: white;
     font-weight: bold;
     padding: 15px;
-    z-index: 100;
 }
- 
+
 .top-bar a {
     background-color: white;
-    color: rgb(96 165 250);;
+    color: rgb(133, 133, 133);
     text-decoration: none;
-    border: rgb(96 165 250) solid 2px;
+    border: rgb(133, 133, 133) solid 2px;
     padding: 10px 17px;
     border-radius: 20px;
     transition: .4s ease;
 }
 .top-bar a:hover {
     text-decoration: underline;
-    background-color: rgb(96 165 250);
+    background-color: rgb(133, 133, 133);
     color: white;
 }
 
@@ -55,8 +54,11 @@
 
 .left-bar {
     position: fixed;
-    top: 70px;
+    top: 73px;
     left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
     height: calc(100% - 50px);
 	background-color: rgb(37 99 235);
     border-right: 1px solid #ddd;
@@ -67,16 +69,17 @@
     display: flex;
     align-items: center;
     color: white;
-    margin-top: 2.5rem;
     padding: 20px;
     cursor: pointer;
     transition: .3s ease;
 }
 .left-bar .option.active {
+    border-radius: 999px;
     background-color: rgb(96 165 250);
 }
 
 .left-bar .option:hover {
+    border-radius: 999px;
     background-color: rgb(96 165 250);
 }
 
@@ -96,12 +99,146 @@
     flex: 1;
 }
 
+.container-init {
+    display: flex;
+}
+
+.container-news {
+    width: 65%;
+    height: 89vh;
+    border-right: 3px solid #20dd4f;
+}
+
+.container-reminder {
+    width: 35%;
+    padding: 10px;
+}
+
+.container-reminder-title {
+    display: flex;
+    background-color: #dbdbdb;
+    border-radius: 10px;
+    padding: 0 30px;
+    width: max-content;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+    transition: .3s ease;
+} 
+.container-reminder-title:hover {
+    background-color: #b6b6b6;
+} 
+
+.container-reminder-title h1 {
+    font-size: 20px;
+    margin: 0;
+}
+
+.container-reminder-title div {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.container-reminder-title svg {
+    width: 30px;
+    height: 30px;
+}
+
+.container-reminder-title span {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.8em;
+    font-weight: bold;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container-reminder-title span::before {
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    background-color: red;
+    border-radius: 25px;
+    animation: loop 1s 0s infinite;
+  }
+  
+  @keyframes loop {
+    0% {
+      background-color: red;
+      width: 1px;
+      height: 1px;
+    }
+    100% {
+      background-color: rgba(0, 255, 0, 0);
+      width: 40px;
+      height: 40px;
+    }
+  }
+  
+
+.box-activite-day {
+    border-left: 6px solid rgb(26, 248, 82);
+    background-color: #d8fcda;
+    border-radius: 10px;
+    margin: 10px 0;
+    padding: 13px 5px;
+}
+
+.box-activite-day-info {
+    display: flex;
+    margin-bottom: 7px;
+    align-items: center;
+}
+
+.box-activite-day-info div {
+    width: 7px;
+    height: 7px;
+    margin-right: 4px;
+    border-radius: 50%;
+    background-color: rgb(248, 172, 32);
+}
+
+.box-activite-day-date {
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    color: #888;
+}
+
+.box-activite-day p {
+    margin: 0;
+    font-weight: bold;
+    color: #20dd4f;
+}
+
+.box-activite-day svg {
+    width: 25px;
+    height: 25px;
+}
+
 .container-activities {
+    width: 94%;
+    margin: 30px;
+}
+
+.box-activities {
     display: flex;
     flex-wrap: wrap;
-    gap: 30px;
-    width: 100%;
-    margin: 30px;
+    gap: 20px;
 }
 
 .container-notes {

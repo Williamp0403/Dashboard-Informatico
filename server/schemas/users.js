@@ -12,7 +12,7 @@ const userSchema = z.object({
 })
 
 const activitieSchema = z.object ({
-    title: z.string().trim().min(5, 'El titulo debe tener al menor 5 caracteres').max(20, 'El titulo no puede tener más de 20 caracteres'),
+    title: z.string().trim().min(5, 'El titulo debe tener al menor 5 caracteres').max(30, 'El titulo no puede tener más de 20 caracteres'),
     description : z.string().min(5, 'La descripcion debe tener al menor 5 caracteres'),
     court: z.enum (['I Corte', 'II Corte', 'III Corte', 'IV Corte'], { message: 'Escoga un corte' }),
     date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "La fecha no es válida", }),

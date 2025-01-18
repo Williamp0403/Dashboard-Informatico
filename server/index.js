@@ -27,12 +27,19 @@ app.get('/', async (req,res) => {
 app.get('/api/news', async (req, res) => { 
     try { 
         const apiKey = process.env.NEWS_API_KEY; 
-        const response = await axios.get(`https://newsdata.io/api/1/latest?apikey=${apiKey}&q=venezuela`) 
+        const response = await axios.get(`https://newsdata.io/api/1/latest?apikey=${apiKey}`) 
         res.json(response.data.results) 
     } catch (error) { 
         console.error('Error fetching news:', error)
         res.status(500).json({ error: 'Error fetching news' })
     } 
+})
+
+app.get('/activitie-day', async (req,res) => {
+    const { id_section, id_matter } = req.query
+    console.log(id_matter)
+    const activities = await userModel.getActivitieForActivities({ id_section, id_matter })
+    res.send(activities)
 })
 
 app.post('/register', async (req,res) => {
@@ -138,6 +145,7 @@ app.get('/notes-student', async (req,res) => {
 
 app.get('/messages', async (req,res) => {
     const { room } = req.query
+    console.log(room)
     const messages = await userModel.getMessages({ room })
     res.send(messages)
 })
@@ -145,21 +153,20 @@ app.get('/messages', async (req,res) => {
 io.on('connection', async (socket) => {
     console.log('Usuario conectado')
 
-    const { id_section, id_matter } = socket.handshake.query  
+    const { id_section, id_matter } = socket.handshake.query
     const rooms = await userModel.joinRooms({ id_section, id_matter })
 
     rooms.forEach(room => {
         socket.join(room.id_matter)
     })
 
-    console.log(socket.rooms)
-
     socket.on('join room', async (room) => {
         socket.join(room)
     })
 
     socket.on('set message', async (msg) => {
-        const message = await userModel.insertMessages({ msg })
+        console.log(msg)
+        await userModel.insertMessages({ msg })
         io.to(msg.group).emit('chat message', msg)
     })
 
